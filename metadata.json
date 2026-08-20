@@ -1,0 +1,6 @@
+{
+  "name": "Sam Trillion Consult",
+  "description": "A premium futuristic website for Sam Trillion Consult with interactive data visualizations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
