@@ -1197,6 +1197,148 @@ const LegalPage = ({
   );
 };
 
+const AnimatedHeroHeading = () => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [typedCount, setTypedCount] = useState(0);
+  const [showSub, setShowSub] = useState(false);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  const fullText = "Real Decisions\nBacked by\n";
+  const tokens = [
+    { type: 'word', text: 'Real' },
+    { type: 'space', text: ' ' },
+    { type: 'word', text: 'Decisions' },
+    { type: 'break', text: '\n' },
+    { type: 'word', text: 'Backed' },
+    { type: 'space', text: ' ' },
+    { type: 'word', text: 'by' },
+    { type: 'break', text: '\n' }
+  ];
+
+  const parsedTokens = [];
+  let runningIdx = 0;
+  for (const t of tokens) {
+    parsedTokens.push({ ...t, startIndex: runningIdx });
+    runningIdx += t.text.length;
+  }
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        } else {
+          setIsVisible(false);
+          setTypedCount(0);
+          setShowSub(false);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (headingRef.current) {
+      observer.observe(headingRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const typeText = async () => {
+      if (isVisible) {
+        setTypedCount(0);
+        setShowSub(false);
+
+        for (let i = 0; i <= fullText.length; i++) {
+          if (isCancelled) return;
+          
+          setTypedCount(i);
+          
+          if (i < fullText.length) {
+            // Human typing speed: Base 60ms + random up to 80ms (60-140ms per keystroke)
+            let delay = 60 + Math.random() * 80;
+            
+            // Pause slightly longer on spaces and line breaks to simulate natural typing
+            if (fullText[i] === ' ') delay += 60;
+            if (fullText[i] === '\n') delay += 300;
+
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+        }
+        
+        if (!isCancelled) {
+          setTimeout(() => setShowSub(true), 200);
+        }
+      }
+    };
+
+    typeText();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isVisible]);
+
+  return (
+    <h1 ref={headingRef} className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-white leading-[0.95] tracking-tighter min-h-[140px] sm:min-h-[160px] md:min-h-[220px] lg:min-h-[280px]">
+      {parsedTokens.map((token, tIdx) => {
+        if (token.type === 'break') {
+          const isCursorHere = token.startIndex === typedCount;
+          return (
+            <React.Fragment key={tIdx}>
+              {isCursorHere && !showSub && typedCount < 24 && (
+                <span className="inline-block w-0 overflow-visible text-white animate-pulse font-light">|</span>
+              )}
+              <br />
+            </React.Fragment>
+          );
+        }
+        
+        if (token.type === 'space') {
+          const isCursorHere = token.startIndex === typedCount;
+          const isVisibleChar = token.startIndex < typedCount;
+          return (
+            <React.Fragment key={tIdx}>
+              {isCursorHere && !showSub && typedCount < 24 && (
+                <span className="inline-block w-0 overflow-visible text-white animate-pulse font-light">|</span>
+              )}
+              <span className={isVisibleChar ? "opacity-100" : "opacity-0"}>&nbsp;</span>
+            </React.Fragment>
+          );
+        }
+        
+        return (
+          <span key={tIdx} className="inline-block whitespace-nowrap">
+            {token.text.split('').map((char, cIdx) => {
+              const charGlobalIdx = token.startIndex + cIdx;
+              const isCursorHere = charGlobalIdx === typedCount;
+              const isVisibleChar = charGlobalIdx < typedCount;
+              return (
+                <React.Fragment key={cIdx}>
+                  {isCursorHere && !showSub && typedCount < 24 && (
+                    <span className="inline-block w-0 overflow-visible text-white animate-pulse font-light">|</span>
+                  )}
+                  <span className={isVisibleChar ? "opacity-100" : "opacity-0"}>{char}</span>
+                </React.Fragment>
+              );
+            })}
+          </span>
+        );
+      })}
+      
+      {typedCount === fullText.length && !showSub && typedCount < 24 && (
+        <span className="inline-block w-0 overflow-visible text-white animate-pulse font-light">|</span>
+      )}
+      
+      <span className={`inline-block transition-all duration-1000 ease-out origin-center ${showSub ? 'opacity-100 scale-100' : 'opacity-0 scale-[1.3] blur-sm absolute'} text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 italic`}>
+        Data and Research
+      </span>
+    </h1>
+  );
+};
+
 export default function App() {
   const [currentPage, setCurrentPage] = useState<'home' | 'about' | 'privacy' | 'terms'>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -1344,10 +1486,7 @@ ${contactForm.message.trim()}`;
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] font-black uppercase tracking-[0.2em] animate-pulse">
                   <Activity size={20} className="text-cyan-400" /> Data is the New Currency
                 </div>
-                <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-white leading-[0.95] tracking-tighter">
-                  Real Decisions <br /> Backed by <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 italic">Data and Research</span>
-                </h1>
+                <AnimatedHeroHeading />
                 <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
                   We translate complex datasets into clear, actionable strategies. From government contracts to executive boardrooms, we empower leaders to see the future before it happens.
                 </p>
