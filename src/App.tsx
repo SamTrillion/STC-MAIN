@@ -1844,7 +1844,7 @@ ${contactForm.message.trim()}`;
                   <div className="w-2 h-2 bg-slate-900/80 border-r border-b border-slate-700/60 rotate-45 mx-auto -mt-1"></div>
                 </div>
                 <a 
-                  href="https://www.linkedin.com/in/samuel-ijomanta/" 
+                  href="https://www.linkedin.com/company/sam-trillion-consult" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   aria-label="Connect on LinkedIn"
@@ -1864,7 +1864,9 @@ ${contactForm.message.trim()}`;
                   <div className="w-2 h-2 bg-slate-900/80 border-r border-b border-slate-700/60 rotate-45 mx-auto -mt-1"></div>
                 </div>
                 <a 
-                  href="#" 
+                  href="https://www.youtube.com/@SamTrillionConsult" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
                   aria-label="Follow on Youtube"
                   className="cursor-pointer w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-[#FF0000] hover:text-white hover:border-[#FF0000] transition-all duration-300 shadow-lg hover:shadow-[#FF0000]/50"
                 >
@@ -1882,7 +1884,9 @@ ${contactForm.message.trim()}`;
                   <div className="w-2 h-2 bg-slate-900/80 border-r border-b border-slate-700/60 rotate-45 mx-auto -mt-1"></div>
                 </div>
                 <a 
-                  href="#" 
+                  href="https://whatsapp.com/channel/0029VbD9GDGEKyZDXK04kn1a" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
                   aria-label="Follow on whatsapp"
                   className="cursor-pointer w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-[#25D366] hover:text-white hover:border-[#25D366] transition-all duration-300 shadow-lg hover:shadow-[#25D366]/50"
                 >
