@@ -35,7 +35,7 @@ import {
 /**
  * ANIMATED BACKGROUND COMPONENT
  */
-const DataCosmosBackground = ({ theme = 'dark', absolute = false }: { theme?: 'dark' | 'light', absolute?: boolean }) => {
+const DataCosmosBackground = ({ theme = 'dark', absolute = false, countMultiplier = 1 }: { theme?: 'dark' | 'light', absolute?: boolean, countMultiplier?: number }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -51,7 +51,7 @@ const DataCosmosBackground = ({ theme = 'dark', absolute = false }: { theme?: 'd
     canvas.height = height;
 
     const particles: Particle[] = [];
-    const particleCount = Math.min(width / 10, 100); 
+    const particleCount = Math.min(width / 10, 100) * countMultiplier; 
     const connectionDistance = 150;
     const mouseDistance = 200;
 
@@ -1045,8 +1045,8 @@ const AboutPage = ({ onContactClick }: { onContactClick?: () => void }) => {
  */
 const ImpactEnginePage = ({ onReturn, onSelectBlueprint }: { onReturn: () => void; onSelectBlueprint?: (summary: string) => void }) => {
   return (
-    <div className="pt-28 pb-20 px-6 min-h-screen bg-white relative z-20 animate-in fade-in duration-500 overflow-hidden">
-      <DataCosmosBackground theme="light" />
+    <div className="pt-28 pb-40 md:pb-56 px-6 min-h-screen bg-white relative z-20 animate-in fade-in duration-500 overflow-hidden">
+      <DataCosmosBackground theme="light" absolute countMultiplier={4} />
       <div className="relative z-10 max-w-7xl mx-auto flex flex-col">
         {/* Header Bar */}
         <div className="py-6 border-b border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between shrink-0 mb-12 gap-4">
@@ -1535,7 +1535,7 @@ ${contactForm.message.trim()}`;
             <span className="text-lg md:text-2xl font-bold tracking-tight text-white uppercase tracking-tighter">SAM TRILLION <span className="text-cyan-400 font-light italic">CONSULT</span></span>
           </div>
 
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-8">
             <button onClick={() => navigateTo('home')} className={`cursor-pointer text-sm font-bold transition-colors uppercase tracking-widest ${currentPage === 'home' && activeSection === 'hero' ? 'text-cyan-400 border-b-2 border-cyan-400 pb-1' : 'text-slate-300 hover:text-cyan-400'}`}>Home</button>
             <button onClick={() => navigateTo('about')} className={`cursor-pointer text-sm font-bold transition-colors uppercase tracking-widest ${currentPage === 'about' ? 'text-cyan-400 border-b-2 border-cyan-400 pb-1' : 'text-slate-300 hover:text-cyan-400'}`}>About</button>
             <button onClick={() => navigateTo('engine')} className={`cursor-pointer text-sm font-bold transition-colors uppercase tracking-widest ${currentPage === 'engine' ? 'text-cyan-400 border-b-2 border-cyan-400 pb-1' : 'text-slate-300 hover:text-cyan-400'}`}>Impact Engine</button>
@@ -1555,14 +1555,14 @@ ${contactForm.message.trim()}`;
             </button>
           </div>
 
-          <button className="md:hidden text-white cursor-pointer" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <button className="lg:hidden text-white cursor-pointer" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? <X /> : <Menu />}
           </button>
         </div>
         
         {/* MOBILE MENU */}
         {isMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 w-full bg-slate-950 border-b border-white/5 p-6 flex flex-col gap-6 animate-in slide-in-from-top-4">
+          <div className="lg:hidden absolute top-full left-0 w-full bg-slate-950 border-b border-white/5 p-6 flex flex-col gap-6 animate-in slide-in-from-top-4">
              <button onClick={() => { navigateTo('home'); setIsMenuOpen(false); }} className={`cursor-pointer text-left text-sm font-bold transition-colors uppercase tracking-widest ${currentPage === 'home' && activeSection === 'hero' ? 'text-cyan-400' : 'text-slate-300 hover:text-cyan-400'}`}>Home</button>
              <button onClick={() => { navigateTo('about'); setIsMenuOpen(false); }} className={`cursor-pointer text-left text-sm font-bold transition-colors uppercase tracking-widest ${currentPage === 'about' ? 'text-cyan-400' : 'text-slate-300 hover:text-cyan-400'}`}>About</button>
              <button onClick={() => { navigateTo('engine'); setIsMenuOpen(false); }} className={`cursor-pointer text-left text-sm font-bold transition-colors uppercase tracking-widest ${currentPage === 'engine' ? 'text-cyan-400' : 'text-slate-300 hover:text-cyan-400'}`}>Impact Engine</button>
