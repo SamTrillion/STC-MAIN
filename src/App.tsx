@@ -1715,18 +1715,18 @@ ${contactForm.message.trim()}`;
                 </a>
               </div>
 
-              {/* YouTube */}
+              {/* YouTube Social Link */}
               <div className="relative group/social flex flex-col items-center">
                 <div className="absolute -top-10 opacity-0 group-hover/social:opacity-100 group-hover/social:-translate-y-1 transition-all duration-300 pointer-events-none z-30 whitespace-nowrap">
                   <div className="px-3 py-1 rounded-lg bg-slate-900/80 backdrop-blur-md border border-slate-700/60 shadow-xl text-[11px] font-medium text-slate-200 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#FF0000] shadow-[0_0_6px_#FF0000]"></span>
-                    Connect on Youtube
+                    Follow on Youtube
                   </div>
                   <div className="w-2 h-2 bg-slate-900/80 border-r border-b border-slate-700/60 rotate-45 mx-auto -mt-1"></div>
                 </div>
                 <a 
                   href="#" 
-                  aria-label="Connect on Youtube"
+                  aria-label="Follow on Youtube"
                   className="cursor-pointer w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-[#FF0000] hover:text-white hover:border-[#FF0000] transition-all duration-300 shadow-lg hover:shadow-[#FF0000]/50"
                 >
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3.016 3.016 0 0 0-2.122 2.136C0 8.07 0 12 0 12s0 3.93.501 5.814a3.016 3.016 0 0 0 2.122 2.136c1.872.55 9.377.55 9.377.55s7.505 0 9.377-.55a3.016 3.016 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
