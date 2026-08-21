@@ -820,7 +820,7 @@ const FounderShowcase = () => {
           >
             <img 
               src="https://raw.githubusercontent.com/SamTrillion/AIBC/refs/heads/main/public/images/ST1%20MAIN.png" 
-              alt="Samuel Ijomanta - Founder & CEO" 
+              alt="Sam Trillion - Founder & CEO" 
               referrerPolicy="no-referrer"
               className="w-full h-[62%] sm:h-[68%] md:h-[72%] max-w-2xl object-contain object-top pt-4 sm:pt-6 transition-transform duration-700 ease-out group-hover:scale-105 filter contrast-[1.05] brightness-[1.02]"
             />
@@ -832,7 +832,7 @@ const FounderShowcase = () => {
           {/* Bottom Centered Write-up & Actions */}
           <div className="relative z-10 p-6 sm:p-10 md:p-12 text-center flex flex-col items-center pt-20 sm:pt-28">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white uppercase tracking-tight mb-2.5">
-              Samuel Ijomanta
+              Sam Trillion
             </h2>
             
             <div className="h-1 w-20 bg-gradient-to-r from-cyan-500 to-transparent mx-auto mb-4"></div>
