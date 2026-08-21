@@ -35,17 +35,18 @@ import {
 /**
  * ANIMATED BACKGROUND COMPONENT
  */
-const DataCosmosBackground = () => {
+const DataCosmosBackground = ({ theme = 'dark', absolute = false }: { theme?: 'dark' | 'light', absolute?: boolean }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const parent = absolute ? canvas.parentElement : window;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    let width = window.innerWidth;
-    let height = window.innerHeight;
+    let width = absolute && canvas.parentElement ? canvas.parentElement.clientWidth : window.innerWidth;
+    let height = absolute && canvas.parentElement ? canvas.parentElement.clientHeight : window.innerHeight;
     canvas.width = width;
     canvas.height = height;
 
@@ -57,8 +58,14 @@ const DataCosmosBackground = () => {
     let mouse = { x: -1000, y: -1000 };
 
     const handleMouseMove = (e: MouseEvent) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
+      if (absolute && canvas.parentElement) {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+      } else {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+      }
     };
     
     const handleMouseLeave = () => {
@@ -66,16 +73,26 @@ const DataCosmosBackground = () => {
       mouse.y = -1000;
     }
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseleave', handleMouseLeave);
+    const targetElement = absolute && canvas.parentElement ? canvas.parentElement : window;
+    targetElement.addEventListener('mousemove', handleMouseMove as EventListener);
+    targetElement.addEventListener('mouseleave', handleMouseLeave);
 
     const handleResize = () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
+      width = absolute && canvas.parentElement ? canvas.parentElement.clientWidth : window.innerWidth;
+      height = absolute && canvas.parentElement ? canvas.parentElement.clientHeight : window.innerHeight;
       canvas.width = width;
       canvas.height = height;
     };
-    window.addEventListener('resize', handleResize);
+    
+    let resizeObserver: ResizeObserver | null = null;
+    if (absolute && canvas.parentElement) {
+      resizeObserver = new ResizeObserver(handleResize);
+      resizeObserver.observe(canvas.parentElement);
+    } else {
+      window.addEventListener('resize', handleResize);
+    }
+
+    const lightThemeColors = ['#0f172a', '#00f0ff'];
 
     class Particle {
       x: number;
@@ -91,7 +108,7 @@ const DataCosmosBackground = () => {
         this.vx = (Math.random() - 0.5) * 0.5;
         this.vy = (Math.random() - 0.5) * 0.5;
         this.size = Math.random() * 2 + 1;
-        this.color = '#00f0ff';
+        this.color = theme === 'dark' ? '#00f0ff' : lightThemeColors[Math.floor(Math.random() * lightThemeColors.length)];
       }
 
       update() {
@@ -134,7 +151,8 @@ const DataCosmosBackground = () => {
           let dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < connectionDistance) {
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(0, 240, 255, ${1 - dist / connectionDistance})`;
+            const opacity = (1 - dist / connectionDistance) * (theme === 'dark' ? 1 : 0.6);
+            ctx.strokeStyle = theme === 'dark' ? `rgba(0, 240, 255, ${opacity})` : `rgba(15, 23, 42, ${opacity})`;
             ctx.lineWidth = 1;
             ctx.moveTo(particles[a].x, particles[a].y);
             ctx.lineTo(particles[b].x, particles[b].y);
@@ -147,14 +165,18 @@ const DataCosmosBackground = () => {
     animate();
     
     return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseleave', handleMouseLeave);
-        window.removeEventListener('resize', handleResize);
+        targetElement.removeEventListener('mousemove', handleMouseMove as EventListener);
+        targetElement.removeEventListener('mouseleave', handleMouseLeave);
+        if (resizeObserver) {
+          resizeObserver.disconnect();
+        } else {
+          window.removeEventListener('resize', handleResize);
+        }
         cancelAnimationFrame(animationFrameId);
     }
-  }, []);
+  }, [theme, absolute]);
 
-  return <canvas ref={canvasRef} className="fixed top-0 left-0 w-full h-full -z-10 bg-slate-950" />;
+  return <canvas ref={canvasRef} className={`${absolute ? 'absolute z-0' : 'fixed -z-10'} top-0 left-0 w-full h-full ${theme === 'dark' ? 'bg-slate-950' : 'bg-white'}`} />;
 };
 
 /**
@@ -1019,6 +1041,39 @@ const AboutPage = ({ onContactClick }: { onContactClick?: () => void }) => {
 };
 
 /**
+ * IMPACT ENGINE PAGE - THE FULL PAGE MATIX EXPERIENCE
+ */
+const ImpactEnginePage = ({ onReturn, onSelectBlueprint }: { onReturn: () => void; onSelectBlueprint?: (summary: string) => void }) => {
+  return (
+    <div className="pt-28 pb-20 px-6 min-h-screen bg-white relative z-20 animate-in fade-in duration-500 overflow-hidden">
+      <DataCosmosBackground theme="light" />
+      <div className="relative z-10 max-w-7xl mx-auto flex flex-col">
+        {/* Header Bar */}
+        <div className="py-6 border-b border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between shrink-0 mb-12 gap-4">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={onReturn}
+              className="w-12 h-12 rounded-full border border-slate-200 bg-white shadow-sm flex items-center justify-center text-slate-600 hover:text-slate-950 hover:border-slate-400 transition-all cursor-pointer"
+            >
+              <ArrowRight size={20} className="rotate-180" />
+            </button>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-black text-slate-950 tracking-tight">Impact Engine</h1>
+              <p className="text-slate-500 font-medium text-sm">Strategic Transformation Simulator</p>
+            </div>
+          </div>
+        </div>
+
+        {/* The Matrix */}
+        <div className="max-w-5xl mx-auto w-full">
+          <ValueProjectionDashboard onSelectBlueprint={onSelectBlueprint} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/**
  * LEGAL MODAL (PRIVACY POLICY & TERMS OF SERVICE) - CRISP WHITE AESTHETIC WITH SHIELDING LEGAL PROTECTION
  */
 const LegalPage = ({ 
@@ -1332,15 +1387,63 @@ const AnimatedHeroHeading = () => {
         <span className="inline-block w-0 overflow-visible text-white animate-pulse font-light">|</span>
       )}
       
-      <span className={`inline-block transition-all duration-1000 ease-out origin-center ${showSub ? 'opacity-100 scale-100' : 'opacity-0 scale-[1.3] blur-sm absolute'} text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 italic`}>
+      <span className={`inline-block transition-all duration-1000 ease-out origin-center ${showSub ? 'opacity-100 scale-100' : 'opacity-0 scale-[1.3] blur-sm absolute'} text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600 italic`}>
         Data and Research
       </span>
     </h1>
   );
 };
 
+const AnimatedCTAHeading = () => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [showStrategic, setShowStrategic] = useState(false);
+  const [showEngine, setShowEngine] = useState(false);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        } else {
+          setIsVisible(false);
+          setShowStrategic(false);
+          setShowEngine(false);
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    if (headingRef.current) {
+      observer.observe(headingRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (isVisible) {
+      const t1 = setTimeout(() => setShowStrategic(true), 300);
+      const t2 = setTimeout(() => setShowEngine(true), 900);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
+    }
+  }, [isVisible]);
+
+  return (
+    <h3 ref={headingRef} className="text-3xl md:text-5xl lg:text-6xl font-black text-slate-950 mb-6 tracking-tight leading-tight">
+      Experience the{' '}
+      <span className={`inline-block transition-all duration-[1200ms] ease-out origin-center ${showStrategic ? 'opacity-100 scale-100 blur-none' : 'opacity-0 scale-[1.15] blur-sm'} text-cyan-400 text-[1.24em]`}>
+        Strategic
+      </span>{' '}
+      Transformation & Intelligence{' '}
+      <span className={`inline-block transition-all duration-[1200ms] ease-out origin-center ${showEngine ? 'opacity-100 scale-100 blur-none' : 'opacity-0 scale-[1.15] blur-sm'} text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600 text-[1.24em]`}>
+        Impact Engine
+      </span>.
+    </h3>
+  );
+};
+
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'about' | 'privacy' | 'terms'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'about' | 'privacy' | 'terms' | 'engine'>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('executives');
   const [formStatus, setFormStatus] = useState('idle');
@@ -1433,7 +1536,9 @@ ${contactForm.message.trim()}`;
           </div>
 
           <div className="hidden md:flex items-center gap-8">
+            <button onClick={() => navigateTo('home')} className={`cursor-pointer text-sm font-bold transition-colors uppercase tracking-widest ${currentPage === 'home' && activeSection === 'hero' ? 'text-cyan-400 border-b-2 border-cyan-400 pb-1' : 'text-slate-300 hover:text-cyan-400'}`}>Home</button>
             <button onClick={() => navigateTo('about')} className={`cursor-pointer text-sm font-bold transition-colors uppercase tracking-widest ${currentPage === 'about' ? 'text-cyan-400 border-b-2 border-cyan-400 pb-1' : 'text-slate-300 hover:text-cyan-400'}`}>About</button>
+            <button onClick={() => navigateTo('engine')} className={`cursor-pointer text-sm font-bold transition-colors uppercase tracking-widest ${currentPage === 'engine' ? 'text-cyan-400 border-b-2 border-cyan-400 pb-1' : 'text-slate-300 hover:text-cyan-400'}`}>Impact Engine</button>
             {['Services', 'Training', 'Projects'].map((item) => {
               const id = item.toLowerCase();
               const isActive = currentPage === 'home' && activeSection === id;
@@ -1458,7 +1563,9 @@ ${contactForm.message.trim()}`;
         {/* MOBILE MENU */}
         {isMenuOpen && (
           <div className="md:hidden absolute top-full left-0 w-full bg-slate-950 border-b border-white/5 p-6 flex flex-col gap-6 animate-in slide-in-from-top-4">
+             <button onClick={() => { navigateTo('home'); setIsMenuOpen(false); }} className={`cursor-pointer text-left text-sm font-bold transition-colors uppercase tracking-widest ${currentPage === 'home' && activeSection === 'hero' ? 'text-cyan-400' : 'text-slate-300 hover:text-cyan-400'}`}>Home</button>
              <button onClick={() => { navigateTo('about'); setIsMenuOpen(false); }} className={`cursor-pointer text-left text-sm font-bold transition-colors uppercase tracking-widest ${currentPage === 'about' ? 'text-cyan-400' : 'text-slate-300 hover:text-cyan-400'}`}>About</button>
+             <button onClick={() => { navigateTo('engine'); setIsMenuOpen(false); }} className={`cursor-pointer text-left text-sm font-bold transition-colors uppercase tracking-widest ${currentPage === 'engine' ? 'text-cyan-400' : 'text-slate-300 hover:text-cyan-400'}`}>Impact Engine</button>
              {['Services', 'Training', 'Projects'].map((item) => {
               const id = item.toLowerCase();
               const isActive = currentPage === 'home' && activeSection === id;
@@ -1497,18 +1604,28 @@ ${contactForm.message.trim()}`;
                 </div>
               </div>
 
-              {/* STRATEGIC TRANSFORMATION MATRIX & SIMULATION UNDER VIEW IMPACT */}
-              <div className="relative w-full max-w-5xl mx-auto mt-16 text-left">
-                <ValueProjectionDashboard 
-                  onSelectBlueprint={(summary) => {
-                    setContactForm(prev => ({
-                      ...prev,
-                      message: prev.message ? `${prev.message}\n\n[Transformation Blueprint Request]:\n${summary}` : `Hello Sam Trillion Consult team,\n\nI evaluated our operational trajectory using your Strategic Transformation Matrix and would like to schedule a discovery consultation.\n\n${summary}`
-                    }));
-                    scrollTo('contact');
-                  }}
-                />
-              </div>
+              {/* Note: Original CTA container removed here to make it full width below */}
+            </div>
+          </section>
+
+          {/* FULL-WIDTH IMPACT ENGINE CTA */}
+          <section className="relative w-full py-24 md:py-32 bg-white overflow-hidden border-t border-b-8 border-slate-200 border-b-cyan-500">
+            <DataCosmosBackground theme="light" absolute />
+            <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
+              <AnimatedCTAHeading />
+              <p className="text-lg md:text-xl text-slate-600 mb-10">
+                See exactly how we map, simulate, and solve complex institutional challenges in real-time.
+              </p>
+              <button 
+                onClick={() => navigateTo('engine')}
+                className="cursor-pointer group/btn relative inline-flex px-10 py-5 bg-slate-950 rounded-2xl overflow-hidden shadow-2xl hover:shadow-cyan-500/30 transition-all duration-500 scale-100 hover:scale-105 active:scale-95"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative flex items-center justify-center gap-3">
+                  <span className="text-white font-black text-lg tracking-wide uppercase">See for Yourself</span>
+                  <ArrowRight className="text-cyan-400 group-hover/btn:text-white group-hover/btn:translate-x-1 transition-all duration-300" size={24} />
+                </div>
+              </button>
             </div>
           </section>
 
@@ -1711,12 +1828,27 @@ ${contactForm.message.trim()}`;
         />
       ) : currentPage === 'privacy' || currentPage === 'terms' ? (
         <LegalPage type={currentPage} onReturn={() => navigateTo('home')} />
+      ) : currentPage === 'engine' ? (
+        <ImpactEnginePage 
+          onReturn={() => navigateTo('home')} 
+          onSelectBlueprint={(summary) => {
+            setContactForm(prev => ({
+              ...prev,
+              message: prev.message ? `${prev.message}\n\n[Transformation Blueprint Request]:\n${summary}` : `Hello Sam Trillion Consult team,\n\nI evaluated our operational trajectory using your Strategic Transformation Matrix and would like to schedule a discovery consultation.\n\n${summary}`
+            }));
+            setCurrentPage('home');
+            setTimeout(() => {
+              const el = document.getElementById('contact');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          }}
+        />
       ) : (
         <AboutPage onContactClick={() => scrollTo('contact')} />
       )}
 
       {/* CONTACT SECTION */}
-      {currentPage !== 'privacy' && currentPage !== 'terms' && (
+      {currentPage !== 'privacy' && currentPage !== 'terms' && currentPage !== 'engine' && (
         <section id="contact" className="py-20 md:py-24 px-6 relative">
           <div className="max-w-4xl mx-auto bg-slate-900/80 backdrop-blur-lg rounded-3xl p-8 md:p-12 border border-slate-800 shadow-2xl">
           <div className="text-center mb-12">
@@ -1816,6 +1948,7 @@ ${contactForm.message.trim()}`;
             <ul className="space-y-4">
               <li><button onClick={() => navigateTo('home')} className="cursor-pointer text-slate-400 hover:text-cyan-400 transition-colors text-sm">Home</button></li>
               <li><button onClick={() => navigateTo('about')} className="cursor-pointer text-slate-400 hover:text-cyan-400 transition-colors text-sm">About Us</button></li>
+              <li><button onClick={() => navigateTo('engine')} className="cursor-pointer text-slate-400 hover:text-cyan-400 transition-colors text-sm">Impact Engine</button></li>
               <li><button onClick={() => scrollTo('services')} className="cursor-pointer text-slate-400 hover:text-cyan-400 transition-colors text-sm">Services</button></li>
               <li><button onClick={() => scrollTo('training')} className="cursor-pointer text-slate-400 hover:text-cyan-400 transition-colors text-sm">Training</button></li>
               <li><button onClick={() => scrollTo('projects')} className="cursor-pointer text-slate-400 hover:text-cyan-400 transition-colors text-sm">Projects</button></li>
